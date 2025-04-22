@@ -210,5 +210,27 @@ async def on_app_command_error(interaction: discord.Interaction, error):
         raise error
 
 # Run the bot
+# Run the bot
 if __name__ == "__main__":
+    import os
+    from flask import Flask
+    from threading import Thread
+    
+    # Create a simple web server
+    app = Flask(__name__)
+    
+    @app.route('/')
+    def home():
+        return "Bot is running!"
+    
+    # Start web server on PORT env variable
+    def run_server():
+        port = int(os.environ.get('PORT', 8080))
+        app.run(host='0.0.0.0', port=port)
+    
+    # Start server in a background thread
+    server = Thread(target=run_server)
+    server.start()
+    
+    # Run your bot as normal
     client.run(BOT_TOKEN)
