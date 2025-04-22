@@ -3,12 +3,13 @@ from discord import app_commands
 from discord.ui import Select, View, Button
 import asyncio
 from typing import Optional
+import os
 
-# Configuration - replace with your own values
-BOT_TOKEN = "MTM2NDI5OTYyNTk4NDQzMDEzMQ.GopB_K.e7Gm8G0FDrl7aKUcC_1mN7Z1KLy7jclsr5LoT4"  # Replace with your actual bot token
-GUILD_ID = 1342232027851784243  # Replace with your server ID
-TICKET_CATEGORY_ID = 1364300307823198268  # Replace with your ticket category ID
-STAFF_ROLE_ID = 1364300522349265026  # Replace with your staff role ID
+# Get configuration from environment variables
+BOT_TOKEN = os.environ.get("BOT_TOKEN")
+GUILD_ID = int(os.environ.get("GUILD_ID", 0))  # Convert to int
+TICKET_CATEGORY_ID = int(os.environ.get("TICKET_CATEGORY_ID", 0))  # Convert to int
+STAFF_ROLE_ID = int(os.environ.get("STAFF_ROLE_ID", 0))  # Convert to int
 
 # QLF Stock services
 QLF_SERVICES = {
