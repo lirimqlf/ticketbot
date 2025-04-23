@@ -65,6 +65,11 @@ class Client(discord.Client):
 client = Client()
 tree = app_commands.CommandTree(client)
 
+# Check if a user has the staff role
+def has_staff_role(interaction):
+    staff_role = interaction.guild.get_role(STAFF_ROLE_ID)
+    return staff_role in interaction.user.roles
+
 # Create the service selection menu
 class ServiceSelectMenu(Select):
     def __init__(self):
@@ -134,6 +139,11 @@ class ServiceSelectMenu(Select):
                 
             @discord.ui.button(label="Claim Ticket", style=discord.ButtonStyle.secondary, custom_id="claim_ticket")
             async def claim_button(self, button_interaction: discord.Interaction, button: Button):
+                # Check if user has staff role
+                if not has_staff_role(button_interaction):
+                    await button_interaction.response.send_message("You need the staff role to claim tickets.", ephemeral=True)
+                    return
+                
                 staff_member = button_interaction.user
                 
                 # Update ticket claim status in memory
@@ -156,17 +166,19 @@ class ServiceSelectMenu(Select):
                 
             @discord.ui.button(label="Delete Ticket", style=discord.ButtonStyle.secondary, custom_id="delete_ticket")
             async def delete_button(self, button_interaction: discord.Interaction, button: Button):
-                if button_interaction.user.guild_permissions.manage_channels or button_interaction.user.get_role(STAFF_ROLE_ID) is not None:
-                    await button_interaction.response.send_message("Deleting this ticket in 5 seconds...", ephemeral=True)
-                    
-                    # Update status in memory
-                    if str(ticket_channel.id) in client.tickets:
-                        client.tickets[str(ticket_channel.id)]["status"] = "deleted"
-                    
-                    await asyncio.sleep(5)
-                    await ticket_channel.delete()
-                else:
-                    await button_interaction.response.send_message("You don't have permission to delete this ticket.", ephemeral=True)
+                # Check if user has staff role
+                if not has_staff_role(button_interaction):
+                    await button_interaction.response.send_message("You need the staff role to delete tickets.", ephemeral=True)
+                    return
+                
+                await button_interaction.response.send_message("Deleting this ticket in 5 seconds...", ephemeral=True)
+                
+                # Update status in memory
+                if str(ticket_channel.id) in client.tickets:
+                    client.tickets[str(ticket_channel.id)]["status"] = "deleted"
+                
+                await asyncio.sleep(5)
+                await ticket_channel.delete()
         
         # Send initial message in the ticket channel
         embed = discord.Embed(
