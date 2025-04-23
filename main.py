@@ -5,19 +5,25 @@ from discord.ui import Select, View, Button
 import asyncio
 from typing import Optional
 from dotenv import load_dotenv
-from flask import Flask
+import http.server
+import socketserver
 from threading import Thread
 
-# Create a Flask web server
-app = Flask(__name__)
-
-@app.route('/')
-def home():
-    return "Discord bot is running!"
+# Create a simple HTTP server
+class SimpleHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header('Content-type', 'text/html')
+        self.end_headers()
+        self.wfile.write(b'Discord bot is running!')
 
 def run_web_server():
     port = int(os.environ.get('PORT', 8080))
-    app.run(host='0.0.0.0', port=port)
+    handler = SimpleHTTPRequestHandler
+    
+    with socketserver.TCPServer(("", port), handler) as httpd:
+        print(f"Serving at port {port}")
+        httpd.serve_forever()
 
 # Load environment variables
 load_dotenv()
