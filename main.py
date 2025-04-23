@@ -1,15 +1,32 @@
 import discord
+import os
 from discord import app_commands
 from discord.ui import Select, View, Button
 import asyncio
 from typing import Optional
-import os
+from dotenv import load_dotenv
+from flask import Flask
+from threading import Thread
 
-# Get configuration from environment variables
-BOT_TOKEN = os.environ.get("BOT_TOKEN")
-GUILD_ID = int(os.environ.get("GUILD_ID", 0))  # Convert to int
-TICKET_CATEGORY_ID = int(os.environ.get("TICKET_CATEGORY_ID", 0))  # Convert to int
-STAFF_ROLE_ID = int(os.environ.get("STAFF_ROLE_ID", 0))  # Convert to int
+# Create a Flask web server
+app = Flask(__name__)
+
+@app.route('/')
+def home():
+    return "Discord bot is running!"
+
+def run_web_server():
+    port = int(os.environ.get('PORT', 8080))
+    app.run(host='0.0.0.0', port=port)
+
+# Load environment variables
+load_dotenv()
+
+# Configuration - using environment variables
+BOT_TOKEN = os.getenv("BOT_TOKEN")  # Will be set in Render environment variables
+GUILD_ID = int(os.getenv("GUILD_ID", "1342232027851784243"))
+TICKET_CATEGORY_ID = int(os.getenv("TICKET_CATEGORY_ID", "1364300307823198268"))
+STAFF_ROLE_ID = int(os.getenv("STAFF_ROLE_ID", "1364300522349265026"))
 
 # QLF Stock services
 QLF_SERVICES = {
@@ -32,6 +49,12 @@ class Client(discord.Client):
             await tree.sync(guild=discord.Object(id=GUILD_ID))
             self.synced = True
         print(f"Logged in as {self.user}")
+        
+        # Set bot presence
+        await self.change_presence(activity=discord.Activity(
+            type=discord.ActivityType.watching, 
+            name="for tickets"
+        ))
 
 client = Client()
 tree = app_commands.CommandTree(client)
@@ -144,7 +167,6 @@ class ServiceSelectMenu(Select):
             title=f"Ticket opened, Wait for any admin to claim the ticket.",
             description=f"Service: {service['name']}\nUser: {member.mention}",
             color = discord.Color(0xffffff)
-
         )
         
         # Create and send the view with ticket control buttons
@@ -210,27 +232,13 @@ async def on_app_command_error(interaction: discord.Interaction, error):
         raise error
 
 # Run the bot
-# Run the bot
 if __name__ == "__main__":
-    import os
-    from flask import Flask
-    from threading import Thread
+    # Start web server in a separate thread
+    print("Starting web server...")
+    server_thread = Thread(target=run_web_server)
+    server_thread.daemon = True  # This ensures the thread will close when the main program exits
+    server_thread.start()
     
-    # Create a simple web server
-    app = Flask(__name__)
-    
-    @app.route('/')
-    def home():
-        return "Bot is running!"
-    
-    # Start web server on PORT env variable
-    def run_server():
-        port = int(os.environ.get('PORT', 8080))
-        app.run(host='0.0.0.0', port=port)
-    
-    # Start server in a background thread
-    server = Thread(target=run_server)
-    server.start()
-    
-    # Run your bot as normal
+    # Run the Discord bot
+    print("Starting Discord bot...")
     client.run(BOT_TOKEN)
