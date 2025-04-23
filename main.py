@@ -38,6 +38,7 @@ STAFF_ROLE_ID = int(os.getenv("STAFF_ROLE_ID", "1364300522349265026"))
 QLF_SERVICES = {
     "SynthX": {"name": "SynthX - Tha Bronx 3", "emoji": "<:qlf:1364046376249462825>"},
     "Boosts Reward": {"name": "Boosts - Reward", "emoji": "<:qlf:1364046376249462825>"},
+    "Giveaway Reward": {"name": "Giveaway - Reward", "emoji": "<:qlf:1364046376249462825>"},
 }
 
 class Client(discord.Client):
