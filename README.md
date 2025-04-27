@@ -120,8 +120,3 @@ Let's build better tools together. 🚀
 # ⚡ Powered by QLF Stock
 
 ---
-
----
-  
-Would you also want me to quickly make you a **fancier version** with emojis, banners, or badges if you want your repo to look even more professional? 🎨🚀  
-(Just say the word!)
